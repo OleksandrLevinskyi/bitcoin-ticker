@@ -2,11 +2,8 @@ import 'dart:convert' as convert;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
-import '../models/crypto.dart';
-
 class NetworkManager {
-  Future<CryptoData> getData(
-      {cryptoAbbrev = 'BTC', currencyAbbrev = 'USD'}) async {
+  Future<double> getData({cryptoAbbrev = 'BTC', currencyAbbrev = 'USD'}) async {
     Uri uri = Uri.https(
       dotenv.env['API_URL'],
       'indices/global/ticker/$cryptoAbbrev$currencyAbbrev',
@@ -25,10 +22,10 @@ class NetworkManager {
 
       double cryptoPrice = data['last'];
 
-      return CryptoData(cryptoPrice);
+      return cryptoPrice;
     }
 
     print('Request failed with status: ${response.statusCode}.');
-    return CryptoData(0);
+    return 0;
   }
 }

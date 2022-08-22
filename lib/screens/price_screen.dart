@@ -12,7 +12,9 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
-  double bitcoinRate = 0;
+  double btcRate = 0;
+  double ethRate = 0;
+  double ltcRate = 0;
 
   @override
   void initState() {
@@ -41,13 +43,33 @@ class _PriceScreenState extends State<PriceScreen> {
               ),
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  '1 BTC = $bitcoinRate $selectedCurrency',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
+                child: Column(
+                  children: [
+                    Text(
+                      '1 BTC = $btcRate $selectedCurrency',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      '1 ETH = $ethRate $selectedCurrency',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      '1 LTC = $ltcRate $selectedCurrency',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -65,11 +87,18 @@ class _PriceScreenState extends State<PriceScreen> {
   }
 
   Future<void> updateCurrencyStats() async {
-    CryptoData crypto =
-        await NetworkManager().getData(currencyAbbrev: selectedCurrency);
+    Iterable<Future<double>> networkCalls =
+        kCryptoList.map((cryptoAbbrev) async {
+      return await NetworkManager().getData(
+          cryptoAbbrev: cryptoAbbrev, currencyAbbrev: selectedCurrency);
+    });
+
+    List<double> cryptoRates = await Future.wait(networkCalls);
 
     setState(() {
-      bitcoinRate = crypto.bitcoinRate;
+      btcRate = cryptoRates[0];
+      ethRate = cryptoRates[1];
+      ltcRate = cryptoRates[2];
     });
   }
 
