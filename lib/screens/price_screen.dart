@@ -1,7 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:bitcoin_ticker/constants.dart';
-import 'package:bitcoin_ticker/models/crypto.dart';
 import 'package:bitcoin_ticker/services/NetworkManager.dart';
+import 'package:bitcoin_ticker/widgets/StatCard.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -12,9 +12,9 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
-  double btcRate = 0;
-  double ethRate = 0;
-  double ltcRate = 0;
+  int btcRate = 0;
+  int ethRate = 0;
+  int ltcRate = 0;
 
   @override
   void initState() {
@@ -35,43 +35,25 @@ class _PriceScreenState extends State<PriceScreen> {
         children: <Widget>[
           Padding(
             padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Column(
-                  children: [
-                    Text(
-                      '1 BTC = $btcRate $selectedCurrency',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      '1 ETH = $ethRate $selectedCurrency',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      '1 LTC = $ltcRate $selectedCurrency',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                StatCard(
+                  cryptoAbbrev: 'BTC',
+                  cryptoRate: btcRate,
+                  currencyAbbrev: selectedCurrency,
                 ),
-              ),
+                StatCard(
+                  cryptoAbbrev: 'ETH',
+                  cryptoRate: ethRate,
+                  currencyAbbrev: selectedCurrency,
+                ),
+                StatCard(
+                  cryptoAbbrev: 'LTC',
+                  cryptoRate: ltcRate,
+                  currencyAbbrev: selectedCurrency,
+                ),
+              ],
             ),
           ),
           Container(
@@ -87,13 +69,12 @@ class _PriceScreenState extends State<PriceScreen> {
   }
 
   Future<void> updateCurrencyStats() async {
-    Iterable<Future<double>> networkCalls =
-        kCryptoList.map((cryptoAbbrev) async {
+    Iterable<Future<int>> networkCalls = kCryptoList.map((cryptoAbbrev) async {
       return await NetworkManager().getData(
           cryptoAbbrev: cryptoAbbrev, currencyAbbrev: selectedCurrency);
     });
 
-    List<double> cryptoRates = await Future.wait(networkCalls);
+    List<int> cryptoRates = await Future.wait(networkCalls);
 
     setState(() {
       btcRate = cryptoRates[0];
