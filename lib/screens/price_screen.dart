@@ -12,13 +12,13 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
-  double bitcoinRate;
+  double bitcoinRate = 0;
 
   @override
   void initState() {
     super.initState();
 
-    callAPI();
+    updateCurrencyStats();
   }
 
   @override
@@ -42,7 +42,7 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = $bitcoinRate USD',
+                  '1 BTC = $bitcoinRate $selectedCurrency',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
@@ -64,8 +64,9 @@ class _PriceScreenState extends State<PriceScreen> {
     );
   }
 
-  Future<void> callAPI() async {
-    CryptoData crypto = await NetworkManager().getData();
+  Future<void> updateCurrencyStats() async {
+    CryptoData crypto =
+        await NetworkManager().getData(currencyAbbrev: selectedCurrency);
 
     setState(() {
       bitcoinRate = crypto.bitcoinRate;
@@ -87,7 +88,8 @@ class _PriceScreenState extends State<PriceScreen> {
     return CupertinoPicker(
       itemExtent: 32,
       onSelectedItemChanged: (selectedIdx) {
-        print(selectedIdx);
+        selectNewCurrency(kCurrenciesList[selectedIdx]);
+        updateCurrencyStats();
       },
       children: dropdownMenuItems,
     );
@@ -106,10 +108,15 @@ class _PriceScreenState extends State<PriceScreen> {
       value: selectedCurrency,
       items: dropdownMenuItems,
       onChanged: (value) {
-        setState(() {
-          selectedCurrency = value;
-        });
+        selectNewCurrency(value);
+        updateCurrencyStats();
       },
     );
+  }
+
+  void selectNewCurrency(value) {
+    setState(() {
+      selectedCurrency = value;
+    });
   }
 }

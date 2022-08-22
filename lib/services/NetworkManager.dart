@@ -5,10 +5,8 @@ import 'package:http/http.dart' as http;
 import '../models/crypto.dart';
 
 class NetworkManager {
-  final cryptoAbbrev = 'BTC';
-  final currencyAbbrev = 'USD';
-
-  Future<CryptoData> getData() async {
+  Future<CryptoData> getData(
+      {cryptoAbbrev = 'BTC', currencyAbbrev = 'USD'}) async {
     Uri uri = Uri.https(
       dotenv.env['API_URL'],
       'indices/global/ticker/$cryptoAbbrev$currencyAbbrev',
