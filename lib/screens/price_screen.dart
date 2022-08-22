@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 import 'package:bitcoin_ticker/constants.dart';
+import 'package:bitcoin_ticker/models/crypto.dart';
 import 'package:bitcoin_ticker/services/NetworkManager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,12 +12,13 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
+  double bitcoinRate;
 
   @override
   void initState() {
-    NetworkManager().getData();
-
     super.initState();
+
+    callAPI();
   }
 
   @override
@@ -40,7 +42,7 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = ? USD',
+                  '1 BTC = $bitcoinRate USD',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
@@ -60,6 +62,14 @@ class _PriceScreenState extends State<PriceScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> callAPI() async {
+    CryptoData crypto = await NetworkManager().getData();
+
+    setState(() {
+      bitcoinRate = crypto.bitcoinRate;
+    });
   }
 
   Widget getDropdown() {
