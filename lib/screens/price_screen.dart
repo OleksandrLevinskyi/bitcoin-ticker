@@ -12,9 +12,7 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
-  int btcRate = 0;
-  int ethRate = 0;
-  int ltcRate = 0;
+  Map<String, int> cryptoRates = {};
 
   @override
   void initState() {
@@ -37,23 +35,7 @@ class _PriceScreenState extends State<PriceScreen> {
             padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                StatCard(
-                  cryptoAbbrev: 'BTC',
-                  cryptoRate: btcRate,
-                  currencyAbbrev: selectedCurrency,
-                ),
-                StatCard(
-                  cryptoAbbrev: 'ETH',
-                  cryptoRate: ethRate,
-                  currencyAbbrev: selectedCurrency,
-                ),
-                StatCard(
-                  cryptoAbbrev: 'LTC',
-                  cryptoRate: ltcRate,
-                  currencyAbbrev: selectedCurrency,
-                ),
-              ],
+              children: getStatCards(),
             ),
           ),
           Container(
@@ -68,18 +50,33 @@ class _PriceScreenState extends State<PriceScreen> {
     );
   }
 
-  Future<void> updateCurrencyStats() async {
-    Iterable<Future<int>> networkCalls = kCryptoList.map((cryptoAbbrev) async {
-      return await NetworkManager().getData(
-          cryptoAbbrev: cryptoAbbrev, currencyAbbrev: selectedCurrency);
-    });
+  List<StatCard> getStatCards() {
+    return cryptoRates.entries.map((entry) {
+      return StatCard(
+        cryptoAbbrev: entry.key,
+        cryptoRate: entry.value,
+        currencyAbbrev: selectedCurrency,
+      );
+    }).toList();
+  }
 
-    List<int> cryptoRates = await Future.wait(networkCalls);
+  Future<void> updateCurrencyStats() async {
+    Map<String, int> rates = {};
+
+    for (String cryptoAbbrev in kCryptoList) {
+      rates.addEntries([
+        MapEntry(
+          cryptoAbbrev,
+          await NetworkManager().getData(
+            cryptoAbbrev: cryptoAbbrev,
+            currencyAbbrev: selectedCurrency,
+          ),
+        ),
+      ]);
+    }
 
     setState(() {
-      btcRate = cryptoRates[0];
-      ethRate = cryptoRates[1];
-      ltcRate = cryptoRates[2];
+      cryptoRates = rates;
     });
   }
 
